@@ -46,15 +46,15 @@ CallCenterOperators --> CallCenterSystem : Работа с системой
 PartnerOperators --> PartnerCallCenterSystem : Работа с системой
 
 ' Интеграции систем
-InternetBank --> ABS : Прямая интеграция с БД
-Website --> ABS : (не показано на схеме)
+InternetBank --> ABS : Заявка на открытие депозита
+Website --> ABS : Заявка на открытие депозита
 
 ' Интеграция кол-центров с АБС
-CallCenterSystem --> ABS : интеграция обращений
-PartnerCallCenterSystem --> ABS : интеграция обращений
+CallCenterSystem --> ABS : Заявка на открытие депозита
+PartnerCallCenterSystem --> ABS : Заявка на открытие депозита
 
 ' Взаимодействия бэк-офиса
-BranchEmployee --> ABS : Работа с клиентами
+BranchEmployee --> ABS : Заявка на открытие депозита
 DepositManager --> ABS : Управление депозитами
 CreditManagers --> ABS : Кредитные операции
 
