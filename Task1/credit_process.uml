@@ -1,0 +1,64 @@
+@startuml
+title Диаграмма последовательности - Как банк рассматривает кредитную заявку
+
+actor "Клиент" as Client
+participant "Менеджер банка" as Manager
+participant "Основная система банка (АБС)" as BankSystem
+participant "Кредитный конвейер" as CreditSystem
+participant "Система скоринга" as Scoring
+participant "Бюро кредитных историй" as CreditBureau
+
+' Шаг 1: Клиент приходит в банк
+Client -> Manager: Заявление на кредит
+activate Manager
+
+Manager -> BankSystem: Заполняю заявку на кредит
+activate BankSystem
+deactivate BankSystem
+
+Manager --> Client: Копия заявки на кредит
+deactivate Manager
+
+' Шаг 2: Заявка попадает в кредитный отдел (раз в день)
+BankSystem -> CreditSystem: Отправка новых заявок
+activate CreditSystem
+
+' Шаг 3: Кредитный отдел проверяет заявку
+CreditSystem -> CreditSystem: Параметры кредита\nданные клиента
+
+' Шаг 4: Проверка кредитной истории
+CreditSystem -> Scoring: Проверка клиента
+activate Scoring
+
+Scoring -> CreditBureau: Запрос кредитной истории клиента
+activate CreditBureau
+CreditBureau --> Scoring: Кредитная история клиента
+deactivate CreditBureau
+
+Scoring -> BankSystem: Данные клинета из банка
+activate BankSystem
+BankSystem --> Scoring: Данные клиента
+deactivate BankSystem
+
+Scoring --> CreditSystem: Результат проверки:\nклиент надежен/ненадежен
+deactivate Scoring
+
+' Шаг 5: Принятие решения
+CreditSystem -> CreditSystem: На основании проверки:\nОдобрить\nОтказать
+
+' Шаг 6: Возврат результата в банк
+CreditSystem -> BankSystem: Решение по клинету\n(раз в сутки)
+activate BankSystem
+
+' Что происходит дальше
+alt Кредит одобрен
+    BankSystem -> BankSystem: Зачисление денег\nна счет клиента
+else Кредит не одобрен
+    BankSystem -> BankSystem: Отказ
+end
+
+BankSystem --> CreditSystem: OK
+deactivate BankSystem
+
+deactivate CreditSystem
+@enduml
