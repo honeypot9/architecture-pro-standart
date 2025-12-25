@@ -50,8 +50,8 @@ InternetBank --> ABS : Заявка на открытие депозита
 Website --> ABS : Заявка на открытие депозита
 
 ' Интеграция кол-центров с АБС
-CallCenterSystem --> ABS : Заявка на открытие депозита
-PartnerCallCenterSystem --> ABS : Заявка на открытие депозита
+CallCenterSystem --> ABS : Предварительная заявка на открытие депозита
+PartnerCallCenterSystem --> ABS : Предварительная заявка на открытие депозита
 
 ' Взаимодействия бэк-офиса
 BranchEmployee --> ABS : Заявка на открытие депозита
