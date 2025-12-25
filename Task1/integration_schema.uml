@@ -14,6 +14,8 @@ package "БЭК-ОФИС" #FFF7E6 {
   rectangle "Менеджеры кредитования" as CreditManagers
 }
 
+  rectangle "Центробанк" as CentroBank #F8CECC
+  CentroBank --> CreditManagers : ставка по депозитам (Excel по почте)
 
   rectangle "АБС (Автоматизированная банковская система)\nDelphi + Oracle + PL-SQL" as ABS #FFE6CC
   rectangle "Система кол-центра\nReact.js + Java Spring Boot + PostgreSQL\n(микросервисы)" as CallCenterSystem #E1D5E7
