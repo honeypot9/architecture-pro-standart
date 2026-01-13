@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Контекстная диаграмма C4 - Онлайн-подача заявок на кредит
+
+Person(client, "Клиент", "Новый или существующий клиент банка, подающий заявку на кредит онлайн")
+
+Person(call_center_manager, "Менеджер кол-центра", "Звонит клиентам с одобренными заявками для назначения встречи")
+Person(front_office_manager, "Менеджер фронт-офиса", "Выдает кредиты в отделении")
+Person(credit_manager, "Менеджер бэк-офиса кредитов", "Обрабатывает заявки в кредитном конвейере")
+System(banking_system, "Банковская система 'Стандарт'", "Обеспечивает подачу и обработку кредитных заявок")
+System_Ext(credit_bureau, "Бюро кредитных историй", "Предоставляет кредитные истории клиентов для скоринга")
+System_Ext(sms_gateway, "СМС-шлюз", "Отправка СМС-уведомлений клиентам")
+
+Rel(client, banking_system, "Заявка на кредит", "Сайт, Интернет-банк")
+Rel(banking_system, credit_bureau, "Запрос кредитной истории для скоринга", "REST API")
+Rel(banking_system, sms_gateway, "Сообщение о решении по заявке (одобрено/отказано/принято в обработку)")
+Rel(sms_gateway, client, "Решение по заявке в формате смс", "SMS")
+Rel_U(banking_system, call_center_manager, "Уведомление о новых одобренных заявках")
+Rel_U(call_center_manager, client, "Назначение встречи в отделении", "Телефонный звонок")
+Rel(banking_system, credit_manager, "Заявка на обработку в кредитном конвейере")
+Rel(credit_manager, banking_system, "Обработка заявок, выдача кредитов в АБС")
+Rel(client, front_office_manager, "Подписание договора и получения кредита", "Личная встреча")
+Rel(front_office_manager, banking_system, "выдача кредитов в АБС")
+
+@enduml
