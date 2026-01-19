@@ -1,0 +1,82 @@
+@startuml
+title Архитектура систем банка
+
+package "КЛИЕНТЫ" {
+  actor "Клиент" as Client
+}
+
+package "ФРОНТ-ОФИС" #E6F7FF {
+  rectangle "Клиентский менеджер" as BranchEmployee
+}
+
+package "БЭК-ОФИС" #FFF7E6 {
+  rectangle "Менеджер депозитов" as DepositManager
+  rectangle "Менеджеры кредитования" as CreditManagers
+}
+
+  rectangle "Центробанк" as CentroBank #F8CECC
+  CentroBank --> CreditManagers : ставка по депозитам (Excel по почте)
+
+  rectangle "АБС (Автоматизированная банковская система)\nDelphi + Oracle + PL-SQL" as ABS #FFE6CC
+  rectangle "Система кол-центра\nReact.js + Java Spring Boot + PostgreSQL\n(микросервисы)" as CallCenterSystem #E1D5E7
+  rectangle "Партнерская система кол-центра\nReact.js + Java Spring Boot + PostgreSQL\n(микросервисы)" as PartnerCallCenterSystem #E1D5E7
+  rectangle "Кредитный конвейер\nCamunda BPM + Oracle" as CreditConveyor #FFF2CC
+  rectangle "Система кредитного скоринга\nPython + Flask + PostgreSQL" as CreditScoring #FFF2CC
+
+package "ВНЕШНИЕ СИСТЕМЫ" {
+  rectangle "Бюро кредитных историй" as CreditBureau #F8CECC
+  rectangle "СМС-шлюз\nТелеком-оператор" as SMSGateway #F8CECC
+}
+
+  rectangle "Операторы кол-центра (200 чел.)" as CallCenterOperators
+  rectangle "Партнёрские операторы (100 чел.)" as PartnerOperators
+  
+  rectangle "Горячая линия банка" as Hotline #D5E8D4
+  rectangle "Интернет-банк\nASP.NET MVC 4.5 + MS SQL" as InternetBank #D5E8D4
+  rectangle "Сайт банка\nPHP + React.js" as Website #D5E8D4
+
+' Взаимодействия с клиентами
+Client --> Hotline : Звонок
+Client --> InternetBank : Доступ к счетам
+Client --> Website : Посещение сайта
+Client --> BranchEmployee : Визит в отделение
+
+' Взаимодействия внутри фронт-офиса
+Hotline --> CallCenterOperators : Маршрутизация звонков
+Hotline --> PartnerOperators : Маршрутизация звонков
+CallCenterOperators --> CallCenterSystem : Работа с системой
+PartnerOperators --> PartnerCallCenterSystem : Работа с системой
+
+' Интеграции систем
+InternetBank --> ABS : Заявка на открытие депозита
+Website --> ABS : Заявка на открытие депозита
+
+' Интеграция кол-центров с АБС
+CallCenterSystem --> ABS : Предварительная заявка на открытие депозита
+PartnerCallCenterSystem --> ABS : Предварительная заявка на открытие депозита
+
+' Взаимодействия бэк-офиса
+BranchEmployee --> ABS : Заявка на открытие депозита
+DepositManager --> ABS : Управление депозитами
+CreditManagers --> ABS : Кредитные операции
+
+' Специальные взаимодействия для кредитов
+CreditManagers --> CreditConveyor : Управление процессами
+ABS --> CreditConveyor : Передача заявок\n1 раз в день (БД)
+CreditConveyor --> ABS : Результаты решений\n1 раз в день
+
+' Кредитный скоринг
+CreditConveyor --> CreditScoring : API вызовы для скоринга
+ABS --> CreditScoring : Данные клиентов\n1 раз в день
+CreditScoring --> CreditBureau : Rest API
+
+' СМС-уведомления
+ABS --> SMSGateway : СМС-уведомления
+SMSGateway --> Client : СМС-уведомления
+
+' Взаимодействия для депозитов и безопасности
+DepositManager --> CreditManagers : Запрос данных (письмо)\n(разделение доступа по требованиям безопасности)
+
+' Области видимости
+hide empty members
+@enduml
