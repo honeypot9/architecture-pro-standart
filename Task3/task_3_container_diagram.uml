@@ -1,0 +1,77 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Система онлайн депозитов (MVP)
+
+' Персоны
+Person(new_client, "Потенциальный клиент")
+Person(existing_client, "Клиент банка")
+Person(call_center_staff, "Операторы кол-центра")
+Person(back_office_staff, "Сотрудник бэк-офиса")
+Person(back_office_staff2, "Сотрудник бэк-офиса")
+Person(centrobank, "Центробанк")
+
+' Границы системы депозитов
+System_Boundary(deposit_system_boundary, "Система онлайн депозитов") {
+
+    ' Frontend контейнеры
+    Container(website_frontend, "Веб-сайт", "React.js, HTML5", "Cайт банка")
+    Container(internet_banking_frontend, "Интернет-банк", "ASP.NET MVC", "Интернет-банк с функционалом управления депозитами")
+
+    ' API Gateway
+    Container(api_gateway, "API Gateway", "Spring Cloud Gateway", "Маршрутизация запросов, авторизация")
+
+    ' Микросервисы
+    Container(deposit_service, "Deposit Service", "ASP.NET Core", "Управление депозитными заявками")
+    Container(rate_service, "Rate Management Service", "Java Spring Boot", "Управление ставками депозитов")
+    Container(notification_service, "Notification Service", "ASP.NET Core", "Уведомление клиентов по смс или email")
+    Container(integration_service, "Integration Service", "Java Spring Boot", "Интеграция с АБС")
+
+    ' Базы данных
+    ContainerDb(deposit_db, "Deposit Database", "MS SQL Server", "Хранение заявок на депозиты, статусы обработки")
+    ContainerDb(rate_db, "Rate Database", "MS SQL Server", "Хранение ставок депозитов, правила расчета")
+    ContainerDb(redis_cache, "Redis Cache", "Redis", "Кэширование ставок, пользовательских сессий")
+
+    ' Очереди сообщений
+    Container(kafka_queue, "Message Queue", "Apache Kafka", "Асинхронная обработка событий между сервисами")
+}
+
+' Внешние системы
+System_Ext(abs_external, "АБС", "Автоматизированная банковская система для обработки заявок", "Oracle, Delphi, PL-SQL")
+System_Ext(call_center_external, "Система кол-центра", "CRM система для обработки обращений", "React.js, Spring Boot, PostgreSQL")
+System_Ext(sms_external, "СМС-шлюз", "Внешний сервис отправки СМС уведомлений")
+
+' Взаимодействия клиентов с frontend
+Rel(new_client, website_frontend, "Просмотр депозитов, подача заявок", "HTTPS")
+Rel(existing_client, internet_banking_frontend, "Авторизация, управление депозитами", "HTTPS")
+
+' Frontend к API Gateway
+Rel(website_frontend, api_gateway, "REST API вызовы", "HTTPS/JSON")
+Rel(internet_banking_frontend, api_gateway, "REST API вызовы", "HTTPS/JSON")
+
+' API Gateway к микросервисам
+Rel(api_gateway, deposit_service, "Маршрутизация запросов на депозиты", "HTTP/JSON")
+Rel(api_gateway, rate_service, "Маршрутизация запросов на ставки", "HTTP/JSON")
+Rel(api_gateway, notification_service, "Маршрутизация уведомлений", "HTTP/JSON")
+
+' Микросервисы к базам данных
+Rel(deposit_service, deposit_db, "Сохранение/чтение заявок", "JDBC")
+Rel(rate_service, rate_db, "Управление ставками", "JDBC")
+Rel(rate_service, redis_cache, "Кэширование ставок", "Redis API")
+
+' Микросервисы к Kafka
+Rel(deposit_service, kafka_queue, "Публикация событий заявок", "Kafka Streams API")
+Rel(integration_service, kafka_queue, "Подписка на события", "Kafka Streams API")
+Rel(notification_service, kafka_queue, "События уведомлений", "Kafka Streams API")
+
+' Интеграции с внешними системами
+Rel(integration_service, abs_external, " Интеграция заявок", "Передача данных раз в день")
+Rel(notification_service, call_center_external, "Уведомления о заявках", "REST API")
+Rel(notification_service, sms_external, "Отправка СМС", "REST API")
+
+' Взаимодействия персонала
+Rel(call_center_staff, call_center_external, "Обработка обращений", "Web UI")
+Rel(back_office_staff, abs_external, "Обработка депозитных заявок", "АБС Desktop UI")
+Rel(centrobank, back_office_staff2, "Актуальная инфромация по ставкам", "Email/Excel")
+Rel(back_office_staff2, rate_service, "Актуальная инфромация по ставкам", "Email/Excel")
+@enduml

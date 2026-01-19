@@ -1,0 +1,37 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Система онлайн депозитов (MVP)
+
+' Внешние элементы
+Person(new_client, "Потенциальные клиенты", "Потенциальные клиенты банка, желающие открыть депозит")
+Person(existing_client, "Клиенты", "Действующие клиенты банка")
+Person(call_center_staff, "Операторы кол-центра", "Обработка обращений")
+Person(back_office_staff, "Сотрудники бэк-офиса", "Обработка заявок")
+
+' Основная система
+System(deposit_system, "Система онлайн депозитов", "Микросервис управления депозитами", "ASP.NET Core, Java Spring Boot, MS SQL, Redis, Kafka")
+
+' Внешние системы
+System_Ext(website, "Сайт банка", "", "React.js, PHP")
+System_Ext(internet_banking, "Интернет-банк", "Интернет-банк для клиентов", "ASP.NET MVC, MS SQL")
+System_Ext(abs_system, "АБС", "Автоматизированная банковская система", "Oracle, Delphi, PL-SQL")
+System_Ext(call_center_system, "Система кол-центра", "CRM система для обработки обращений", "React.js, Spring Boot, PostgreSQL")
+System_Ext(sms_gateway, "СМС-шлюз", "Внешний сервис отправки СМС уведомлений")
+
+' Взаимодействия с клиентами
+Rel(new_client, website, "Просматривает депозиты, подает заявки", "HTTPS")
+Rel(existing_client, internet_banking, "Авторизация, управление депозитами", "HTTPS")
+
+' Взаимодействия с персоналом
+Rel(call_center_staff, call_center_system, "Обработка обращений клиентов", "CRM UI")
+Rel(back_office_staff, abs_system, "Обработка депозитных заявок", "Desktop App")
+
+' Интеграции с основной системой
+Rel(website, deposit_system, "Заявки открытия депозита", "REST API/HTTPS")
+Rel(internet_banking, deposit_system, "Работа над депозитами", "REST API/HTTPS")
+Rel(deposit_system, call_center_system, "Уведомления о заявках", "REST API")
+Rel(deposit_system, abs_system, "Интеграция (передача заявок на обработку)", "Раз в день")
+Rel(deposit_system, sms_gateway, "СМС уведомления", "REST API")
+
+@enduml
